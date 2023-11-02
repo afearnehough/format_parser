@@ -27,6 +27,6 @@ describe FormatParser::AIFFParser do
   it 'parses an AIFF file with id3 metadata and artwork' do
     parse_result = subject.call(File.open('/Users/adamfearnehough/Music/test.aif', 'rb'))
 
-    puts parse_result.to_json
+    puts parse_result.intrinsics[:id3tags].get_frames(:APIC).first.mime_type
   end
 end

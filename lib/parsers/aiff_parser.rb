@@ -1,3 +1,5 @@
+require 'id3tag'
+
 class FormatParser::AIFFParser
   include FormatParser::IOUtils
 
@@ -42,16 +44,11 @@ class FormatParser::AIFFParser
       content_type: AIFF_MIME_TYPE
     }
 
-    puts "============== PARSING AIFF =============="
-
     # There might be COMT chunks, for example in Logic exports
     loop do
       chunk_data = io.read(chunk_header_size)
       break unless chunk_data && chunk_data.bytesize == chunk_header_size
       chunk_type, chunk_size = chunk_data.unpack('a4N')
-
-      puts "Chunk type #{chunk_type}"
-      puts "Chunk size #{chunk_size}"
 
       case chunk_type
       when 'COMM'
@@ -65,7 +62,7 @@ class FormatParser::AIFFParser
         attributes = attributes.merge(unpack_comm_chunk(io))
 
       when 'ID3 '
-        attributes = attributes.merge(unpack_id3_chunk(io))
+        attributes = attributes.merge(unpack_id3_chunk(io, chunk_size))
 
       when *KNOWN_CHUNKS
         # We continue looping only if we encountered something that looks like
@@ -99,9 +96,14 @@ class FormatParser::AIFFParser
     }
   end
 
-  def unpack_id3_chunk(io)
-
-
+  def unpack_id3_chunk(io, chunk_size)
+    blob = safe_read(io, chunk_size)
+    tags = ID3Tag.read(StringIO.new(blob), :v2)
+    return {
+      intrinsics: {
+        id3tags: tags
+      }
+    }
   end
 
   def unpack_extended_float(ten_bytes_string)
