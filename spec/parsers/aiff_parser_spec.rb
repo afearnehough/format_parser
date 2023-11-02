@@ -23,4 +23,10 @@ describe FormatParser::AIFFParser do
     expect(parse_result.audio_sample_rate_hz).to be_within(0.01).of(44100)
     expect(parse_result.media_duration_seconds).to be_within(0.01).of(6.85)
   end
+
+  it 'parses an AIFF file with id3 metadata and artwork' do
+    parse_result = subject.call(File.open('/Users/adamfearnehough/Music/test.aif', 'rb'))
+
+    puts parse_result.to_json
+  end
 end

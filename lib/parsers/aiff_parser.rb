@@ -18,6 +18,8 @@ class FormatParser::AIFFParser
     'AUTH',
     '(c) ', # yes it is a thing
     'ANNO',
+    'ID3 ',
+    'CHAN'
   ]
 
   def likely_match?(filename)
@@ -26,16 +28,31 @@ class FormatParser::AIFFParser
 
   def call(io)
     io = FormatParser::IOConstraint.new(io)
-    form_chunk_type, chunk_size = safe_read(io, 8).unpack('a4N')
+    chunk_header_size = 8
+    form_chunk_type, chunk_size = safe_read(io, chunk_header_size).unpack('a4N')
+
     return unless form_chunk_type == 'FORM' && chunk_size > 4
 
     fmt_chunk_type = safe_read(io, 4)
 
     return unless fmt_chunk_type == 'AIFF'
 
+    attributes = {
+      format: :aiff,
+      content_type: AIFF_MIME_TYPE
+    }
+
+    puts "============== PARSING AIFF =============="
+
     # There might be COMT chunks, for example in Logic exports
     loop do
-      chunk_type, chunk_size = safe_read(io, 8).unpack('a4N')
+      chunk_data = io.read(chunk_header_size)
+      break unless chunk_data && chunk_data.bytesize == chunk_header_size
+      chunk_type, chunk_size = chunk_data.unpack('a4N')
+
+      puts "Chunk type #{chunk_type}"
+      puts "Chunk size #{chunk_size}"
+
       case chunk_type
       when 'COMM'
         # The ID is always COMM. The chunkSize field is the number of bytes in the
@@ -44,7 +61,12 @@ class FormatParser::AIFFParser
         # variable length (but to maintain compatibility with possible future
         # extensions, if the chunkSize is > 18, you should always treat those extra
         # bytes as pad bytes).
-        return unpack_comm_chunk(io)
+
+        attributes = attributes.merge(unpack_comm_chunk(io))
+
+      when 'ID3 '
+        attributes = attributes.merge(unpack_id3_chunk(io))
+
       when *KNOWN_CHUNKS
         # We continue looping only if we encountered something that looks like
         # a valid AIFF chunk type - skip the size and continue
@@ -54,6 +76,8 @@ class FormatParser::AIFFParser
         return
       end
     end
+
+    return FormatParser::Audio.new(**attributes)
   end
 
   def unpack_comm_chunk(io)
@@ -67,14 +91,17 @@ class FormatParser::AIFFParser
     duration_in_seconds = sample_frames / sample_rate
     return unless duration_in_seconds > 0
 
-    FormatParser::Audio.new(
-      format: :aiff,
+    return {
       num_audio_channels: channels,
       audio_sample_rate_hz: sample_rate.to_i,
       media_duration_frames: sample_frames,
       media_duration_seconds: duration_in_seconds,
-      content_type: AIFF_MIME_TYPE,
-    )
+    }
+  end
+
+  def unpack_id3_chunk(io)
+
+
   end
 
   def unpack_extended_float(ten_bytes_string)
