@@ -24,9 +24,12 @@ describe FormatParser::AIFFParser do
     expect(parse_result.media_duration_seconds).to be_within(0.01).of(6.85)
   end
 
-  it 'parses an AIFF file with id3 metadata and artwork' do
-    parse_result = subject.call(File.open('/Users/adamfearnehough/Music/test.aif', 'rb'))
+  # it 'parses an AIFF file with id3 metadata and artwork' do
+  #   parse_result = subject.call(File.open('/Users/adamfearnehough/Music/test.aif', 'rb'))
 
-    puts parse_result.intrinsics[:id3tags].get_frames(:APIC).first.mime_type
-  end
+  #   puts parse_result.title
+  #   puts parse_result.album
+  #   puts parse_result.artist
+  #   puts parse_result.intrinsics[:id3tags][0].get_frames(:APIC).first.mime_type
+  # end
 end

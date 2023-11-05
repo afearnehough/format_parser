@@ -98,10 +98,13 @@ class FormatParser::AIFFParser
 
   def unpack_id3_chunk(io, chunk_size)
     blob = safe_read(io, chunk_size)
-    tags = ID3Tag.read(StringIO.new(blob), :v2)
+    tag = ID3Tag.read(StringIO.new(blob), :v2)
     return {
+      title: tag.title,
+      album: tag.album,
+      artist: tag.artist,
       intrinsics: {
-        id3tags: tags
+        id3tags: [tag]
       }
     }
   end
