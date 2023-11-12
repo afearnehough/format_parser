@@ -104,6 +104,8 @@ class FormatParser::AIFFParser
       album: tag.album,
       artist: tag.artist,
       intrinsics: {
+        year: tag.year
+        genre: tag.genre
         id3tags: [tag]
       }
     }
