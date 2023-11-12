@@ -121,5 +121,5 @@ class FormatParser::AIFFParser
     (sign == '1' ? -1.0 : 1.0) * (fraction.to_f / ((1 << 63) - 1)) * (2**exponent)
   end
 
-  FormatParser.register_parser new, natures: :audio, formats: :aiff
+  FormatParser.register_parser new, natures: :audio, formats: [:aiff, :aif]
 end
