@@ -29,6 +29,8 @@ class FormatParser::AIFFParser
   end
 
   def call(io)
+    puts "!!!!!!!!!!!!!! PARSING AIFF FILE"
+
     io = FormatParser::IOConstraint.new(io)
     chunk_header_size = 8
     form_chunk_type, chunk_size = safe_read(io, chunk_header_size).unpack('a4N')
@@ -43,6 +45,8 @@ class FormatParser::AIFFParser
       format: :aiff,
       content_type: AIFF_MIME_TYPE
     }
+
+    puts "Looping through chunks"
 
     # There might be COMT chunks, for example in Logic exports
     loop do
