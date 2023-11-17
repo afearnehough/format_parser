@@ -121,6 +121,14 @@ describe FormatParser do
       end
     end
 
+    # it 'correctly detects a AIFF file' do
+    #   File.open('/Users/adamfearnehough/Music/test.aif') do |file|
+    #     file_information = FormatParser.parse(file)
+    #     expect(file_information).not_to be_nil
+    #     expect(file_information.format).to eq(:aiff)
+    #   end
+    # end
+
     describe 'when multiple results are requested' do
       let(:blob) { StringIO.new(Random.new.bytes(512 * 1024)) }
       let(:audio) { FormatParser::Audio.new(format: :aiff, num_audio_channels: 1) }

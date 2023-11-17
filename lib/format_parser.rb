@@ -31,7 +31,7 @@ module FormatParser
   # potentially be mutated from different threads. The mutex won't be hit too often
   # since it only locks when adding/removing parsers.
   PARSER_MUX = Mutex.new
-  MAX_BYTES_READ_PER_PARSER = 1024 * 1024 * 2
+  MAX_BYTES_READ_PER_PARSER = 1024 * 1024 * 32
 
   # The value will ensure the parser having it will be applied to the file last.
   LEAST_PRIORITY = 99
